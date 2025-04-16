@@ -71,3 +71,6 @@ flutter:
   #
   # For details regarding fonts in packages, see
   # https://flutter.dev/to/font-from-package
+
+maintainers:
+  - YueYing Industry <charlie@yueying-industry.com>

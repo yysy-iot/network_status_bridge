@@ -1,3 +1,5 @@
+[![pub package](https://img.shields.io/pub/v/network_status_bridge.svg)](https://pub.dev/packages/network_status_bridge)
+
 # network_status_bridge
 
 A cross-platform Flutter plugin to monitor real-time network connectivity changes using iOS `NWPathMonitor` and Android `ConnectivityManager`.
