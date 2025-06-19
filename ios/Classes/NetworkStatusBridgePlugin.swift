@@ -21,7 +21,7 @@ public final class NetworkStatusBridgePlugin: NSObject, FlutterPlugin, FlutterSt
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "getCurrentType":
-            result(YYINetworkMonitor.shared.currentType)
+            result(YYINetworkMonitor.shared.currentType.rawValue)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -46,6 +46,6 @@ public final class NetworkStatusBridgePlugin: NSObject, FlutterPlugin, FlutterSt
     
     ///
     private func networkObserver(_ type: YYINetworkType) {
-        eventSink?(type)
+        eventSink?(type.rawValue)
     }
 }
