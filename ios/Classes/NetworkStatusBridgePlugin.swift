@@ -46,6 +46,8 @@ public final class NetworkStatusBridgePlugin: NSObject, FlutterPlugin, FlutterSt
     
     ///
     private func networkObserver(_ type: YYINetworkType) {
-        eventSink?(type.rawValue)
+        DispatchQueue.main.async { [weak self] in
+            self?.eventSink?(type.rawValue)
+        }
     }
 }

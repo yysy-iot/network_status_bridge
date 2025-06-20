@@ -7,6 +7,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /** NetworkStatusBridgePlugin */
 class NetworkStatusBridgePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
@@ -46,7 +48,9 @@ class NetworkStatusBridgePlugin : FlutterPlugin, MethodCallHandler, EventChannel
     override fun onListen(arguments: Any?, events: EventSink?) {
         eventSink = events
         eventToken = NetworkMonitor.addObserver {
-            events?.success(it.value)
+            MainScope().launch {
+                events?.success(it.value)
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 name: network_status_bridge
 description: "A Flutter plugin to monitor network changes with native accuracy (iOS/Android)."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/yysy-iot
 repository: https://github.com/yysy-iot/network_status_bridge
 
