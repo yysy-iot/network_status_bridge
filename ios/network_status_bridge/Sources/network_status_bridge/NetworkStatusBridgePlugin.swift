@@ -1,4 +1,7 @@
 import Flutter
+#if canImport(network_status_bridge_objc)
+import network_status_bridge_objc
+#endif
 
 public final class NetworkStatusBridgePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     

@@ -13,7 +13,9 @@ A Flutter plugin to monitor network changes with native accuracy (iOS/Android).
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'YueYing Industry' => 'charlie@yueying-industry.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'network_status_bridge/Sources/network_status_bridge/**/*', 'network_status_bridge/Sources/network_status_bridge_objc/**/*'
+  s.public_header_files = 'network_status_bridge/Sources/network_status_bridge_objc/include/**/*.h'
+  s.resource_bundles = {'network_status_bridge_privacy' => ['network_status_bridge/Sources/network_status_bridge/PrivacyInfo.xcprivacy']}
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
 

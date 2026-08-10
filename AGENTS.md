@@ -16,9 +16,12 @@ Flutter 插件：iOS/Android 实时网络状态监听（iOS `NWPathMonitor` / An
 - 事件回调必须派发到主线程再调 `eventSink`（Android 用 `MainScope().launch`，iOS 用 `DispatchQueue.main.async`）。0.0.3 曾因主线程问题崩溃，勿回退该模式
 - Android 端 `NetworkMonitor` 是单例 `object`，在 `onAttachedToEngine` 启动监听后**永不注销**（`onDetachedFromEngine` 只清 handler，未调 `unregisterNetworkCallback`）；`NetworkRequest.Builder().build()` 注册全部网络
 - iOS 端 `YYINetworkMonitor` 用 `nw_path_monitor`（Network.framework），要求 iOS 12+（podspec `platform :ios, '12.0'`）；Android minSdk 23 / compileSdk 35 / Java 17
+- **iOS 同时支持 SwiftPM 与 CocoaPods**（Flutter 3.44+ 默认 SwiftPM，CocoaPods 2026-12 转只读）。SPM 包在 `ios/network_status_bridge/`，因 SwiftPM 不允许 target 混语言，拆为两个 target：`network_status_bridge`（Swift，pluginClass）+ `network_status_bridge_objc`（ObjC 监听核心）。CocoaPods 下 Swift 通过模块 umbrella 自动访问 ObjC 头（不用 bridging header，framework target 不支持）
 
 ## 坑
 
-- **iOS ObjC 源文件名为 ` YYINetworkMonitor.m`（带前导空格）**，podspec 靠 `Classes/**/*` 通配符收录。重命名/重构时勿误删或改坏
-- iOS podspec `s.version` 是 0.0.1，与 pubspec 的 0.0.3 不一致，发布前需同步
+- iOS 源文件位于 `ios/network_status_bridge/Sources/`：Swift 入口在 `network_status_bridge/`，ObjC 核心在 `network_status_bridge_objc/`（公开头在 `include/network_status_bridge/`）。**不要**把文件移回 `ios/Classes/`（已删除）
+- iOS podspec 版本需与 pubspec 同步（当前 0.0.4）。改 podspec 的 `source_files` 时需同时含 `Sources/network_status_bridge` 与 `Sources/network_status_bridge_objc` 两目录
+- `YYINetworkMonitor.h` 必须 `#import <Foundation/Foundation.h>`（独立 SPM target 下无 umbrella 头自动导入）
+- `flutter build ios` 会触发 SPM 迁移并修改 `example/ios/` 工程文件（最低 iOS 13.0、UIScene 等），这些改动需一并提交
 - `example/lib/main.dart` 是粗糙的最小示例（缩进混乱），不要把它当作 API 用法标准

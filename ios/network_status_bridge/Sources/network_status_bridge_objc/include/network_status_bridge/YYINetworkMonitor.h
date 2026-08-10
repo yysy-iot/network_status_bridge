@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 typedef NS_ENUM(NSInteger, YYINetworkType) {
     YYINetworkTypeNone = 0,
     YYINetworkTypeWiFi,
