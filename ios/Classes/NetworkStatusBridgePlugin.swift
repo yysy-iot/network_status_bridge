@@ -31,7 +31,9 @@ public final class NetworkStatusBridgePlugin: NSObject, FlutterPlugin, FlutterSt
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         eventSink = events
         token = YYINetworkMonitor.shared.addObserver(networkObserver)
-        return nil;
+        // 发送当前网络状态作为初始值，确保订阅者立即收到
+        events(YYINetworkMonitor.shared.currentType.rawValue)
+        return nil
     }
     
     ///

@@ -18,12 +18,19 @@ class NetworkStatusBridge {
   static Stream<NetworkType> get onNetworkChanged {
     _onChanged ??= _eventChannel
         .receiveBroadcastStream()
-        .map((dynamic event) => NetworkType.values[event as int]);
+        .map((dynamic event) => _indexToType(event as int));
     return _onChanged!;
   }
 
   static Future<NetworkType> getCurrentType() async {
     final int result = await _methodChannel.invokeMethod('getCurrentType');
-    return NetworkType.values[result];
+    return _indexToType(result);
+  }
+
+  static NetworkType _indexToType(int index) {
+    if (index >= 0 && index < NetworkType.values.length) {
+      return NetworkType.values[index];
+    }
+    return NetworkType.other;
   }
 }

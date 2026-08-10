@@ -8,6 +8,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /** NetworkStatusBridgePlugin */
@@ -16,8 +17,8 @@ class NetworkStatusBridgePlugin : FlutterPlugin, MethodCallHandler, EventChannel
     private lateinit var methodChannel: MethodChannel
     private lateinit var eventChannel: EventChannel
 
-    private var eventSink: EventSink? = null
     private var eventToken: String? = null
+    private val scope = MainScope()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel =
@@ -34,6 +35,7 @@ class NetworkStatusBridgePlugin : FlutterPlugin, MethodCallHandler, EventChannel
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel.setMethodCallHandler(null)
         eventChannel.setStreamHandler(null)
+        scope.cancel()
     }
 
 
@@ -46,17 +48,18 @@ class NetworkStatusBridgePlugin : FlutterPlugin, MethodCallHandler, EventChannel
 
 
     override fun onListen(arguments: Any?, events: EventSink?) {
-        eventSink = events
+        // 先注册监听，确保不丢失任何变化
         eventToken = NetworkMonitor.addObserver {
-            MainScope().launch {
+            scope.launch {
                 events?.success(it.value)
             }
         }
+        // 再发送当前网络状态作为初始值（注册后读取，保证是最新的）
+        events?.success(NetworkMonitor.type.value)
     }
 
     override fun onCancel(arguments: Any?) {
         eventToken?.let(NetworkMonitor::removeObserver)
         eventToken = null
-        eventSink = null
     }
 }

@@ -1,9 +1,10 @@
 #import "YYINetworkMonitor.h"
 #import <Network/Network.h>
+#import <os/lock.h>
 
 @interface YYINetworkMonitor () {
     nw_path_monitor_t _monitor;
-    dispatch_queue_t _syncQueue;
+    os_unfair_lock _lock;
 }
 
 @property (nonatomic, assign, readwrite) BOOL isConnected;
@@ -18,31 +19,32 @@
 
 
 - (void)startMonitoring {
-    dispatch_barrier_async(_syncQueue, ^{
-        [self _startMonitoring];
-    });
+    os_unfair_lock_lock(&_lock);
+    [self _startMonitoring];
+    os_unfair_lock_unlock(&_lock);
 }
 
 - (NSString *)addObserver:(void (^)(YYINetworkType type))callback {
     if (!callback) return nil;
     NSString *token = NSUUID.UUID.UUIDString;
-    dispatch_barrier_async(_syncQueue, ^{
-        self.callbackMap[token] = [callback copy];
-    });
+    // 同步注册，确保 observer 在返回前已加入，避免遗漏注册后的网络变化
+    os_unfair_lock_lock(&_lock);
+    self.callbackMap[token] = [callback copy];
+    os_unfair_lock_unlock(&_lock);
     return token;
 }
 
 - (void)removeObserver:(NSString *)token {
     if (!token) return;
-    dispatch_barrier_async(_syncQueue, ^{
-        [self.callbackMap removeObjectForKey:token];
-    });
+    os_unfair_lock_lock(&_lock);
+    [self.callbackMap removeObjectForKey:token];
+    os_unfair_lock_unlock(&_lock);
 }
 
 - (void)removeAllObservers {
-    dispatch_barrier_async(_syncQueue, ^{
-        [self.callbackMap removeAllObjects];
-    });
+    os_unfair_lock_lock(&_lock);
+    [self.callbackMap removeAllObjects];
+    os_unfair_lock_unlock(&_lock);
 }
 
 #pragma mark - Private
@@ -78,16 +80,16 @@
 
 ///
 - (void)updateType:(YYINetworkType)type {
-    dispatch_barrier_async(_syncQueue, ^{
-        self.isConnected = (type != YYINetworkTypeNone);
-        self.currentType = type;
-        [self performCallbacks:type];
-    });
-}
+    NSArray *callbacks;
+    // 锁内：只更新数据 + 拷贝回调列表，不执行任何回调
+    os_unfair_lock_lock(&_lock);
+    self.isConnected = (type != YYINetworkTypeNone);
+    self.currentType = type;
+    callbacks = [self.callbackMap.allValues copy];
+    os_unfair_lock_unlock(&_lock);
 
-/// 回调所有监听者
-- (void)performCallbacks:(YYINetworkType)type {
-    for (void (^callback)(YYINetworkType type) in _callbackMap.allValues) {
+    // 锁外：执行回调。回调可任意耗时，甚至同步调用 currentType/isConnected，不会死锁
+    for (void (^callback)(YYINetworkType type) in callbacks) {
         if (callback) callback(type);
     }
 }
@@ -95,18 +97,16 @@
 #pragma mark - Thread-safe property getter
 
 - (BOOL)isConnected {
-    __block BOOL value;
-    dispatch_sync(_syncQueue, ^{
-        value = _isConnected;
-    });
+    os_unfair_lock_lock(&_lock);
+    BOOL value = _isConnected;
+    os_unfair_lock_unlock(&_lock);
     return value;
 }
 
 - (YYINetworkType)currentType {
-    __block YYINetworkType type;
-    dispatch_sync(_syncQueue, ^{
-        type = _currentType;
-    });
+    os_unfair_lock_lock(&_lock);
+    YYINetworkType type = _currentType;
+    os_unfair_lock_unlock(&_lock);
     return type;
 }
 
@@ -144,7 +144,7 @@
 - (instancetype)initPrivate {
     self = [super init];
     if (self) {
-        _syncQueue = dispatch_queue_create("com.guoanvision.network_monitor.sync", DISPATCH_QUEUE_CONCURRENT);
+        _lock = OS_UNFAIR_LOCK_INIT;
         _callbackMap = [NSMutableDictionary dictionary];
     }
     return self;

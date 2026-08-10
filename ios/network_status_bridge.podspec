@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'network_status_bridge'
-  s.version          = '0.0.1'
+  s.version          = '0.0.3'
   s.summary          = 'A Flutter plugin to monitor network changes with native accuracy.'
   s.description      = <<-DESC
 A Flutter plugin to monitor network changes with native accuracy (iOS/Android).

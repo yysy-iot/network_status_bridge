@@ -4,7 +4,7 @@ import 'package:network_status_bridge/network_status_bridge.dart';
 
 void main() {
   runApp(CupertinoApp(home: Container()));
-    NetworkStatusBridge.onNetworkChanged.listen((status) {
+  NetworkStatusBridge.onNetworkChanged.listen((status) {
     print("网络变化：$status");
   });
 
