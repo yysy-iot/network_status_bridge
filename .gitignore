@@ -32,3 +32,6 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 build/
 .vscode
+
+# Flutter SPM 自动生成的 FlutterFramework 包（不要提交到仓库）
+ios/FlutterFramework/

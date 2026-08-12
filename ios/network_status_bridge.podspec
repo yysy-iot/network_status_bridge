@@ -4,20 +4,20 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'network_status_bridge'
-  s.version          = '0.0.4'
+  s.version          = '0.0.5'
   s.summary          = 'A Flutter plugin to monitor network changes with native accuracy.'
   s.description      = <<-DESC
 A Flutter plugin to monitor network changes with native accuracy (iOS/Android).
                        DESC
   s.homepage         = 'https://github.com/yysy-iot'
-  s.license          = { :file => '../LICENSE' }
+  s.license          = { :type => 'MIT', :file => '../LICENSE' }
   s.author           = { 'YueYing Industry' => 'charlie@yueying-industry.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'network_status_bridge/Sources/network_status_bridge/**/*', 'network_status_bridge/Sources/network_status_bridge_objc/**/*'
+  s.source_files = 'network_status_bridge/Sources/network_status_bridge/**/*.{h,m,swift}', 'network_status_bridge/Sources/network_status_bridge_objc/**/*.{h,m}'
   s.public_header_files = 'network_status_bridge/Sources/network_status_bridge_objc/include/**/*.h'
   s.resource_bundles = {'network_status_bridge_privacy' => ['network_status_bridge/Sources/network_status_bridge/PrivacyInfo.xcprivacy']}
   s.dependency 'Flutter'
-  s.platform = :ios, '12.0'
+  s.platform = :ios, '13.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

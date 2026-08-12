@@ -18,7 +18,7 @@ typedef NS_ENUM(NSInteger, YYINetworkType) {
 @property (nonatomic, class, readonly, nonnull) YYINetworkMonitor* shared;
 
 
-- (instancetype _Nullable)init NS_UNAVAILABLE;
+- (instancetype _Nonnull)init NS_UNAVAILABLE;
 
 /// 启动监听
 - (void)startMonitoring;
